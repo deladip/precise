@@ -220,6 +220,11 @@ export default function Contact() {
                     >
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
+                    
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      By submitting this form, you agree that we may collect and use your information to respond to your inquiry. 
+                      Your data is kept secure and confidential and will not be shared with third parties.
+                    </p>
                   </form>
                 </Form>
               </CardContent>
