@@ -147,6 +147,9 @@ export default function Contact() {
                 <CardDescription>
                   Tell us about your tax or business needs and we will get back to you.
                 </CardDescription>
+                <p className="text-xs text-muted-foreground mt-3 italic">
+                  PRECISE METHOD is an IRS-authorized firm. All communications are handled professionally and confidentially.
+                </p>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
