@@ -11,6 +11,7 @@ import Services from "@/pages/Services";
 import BusinessSolutions from "@/pages/BusinessSolutions";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/business-solutions" component={BusinessSolutions} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
+          <Route path="/privacy" component={Privacy} />
           <Route component={NotFound} />
         </Switch>
       </main>

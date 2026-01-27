@@ -79,10 +79,14 @@ export default function Footer() {
           <p className="text-xs text-gray-400">
             PRECISE METHOD © 2026 Tax, Business & Accounting Services.
           </p>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <span className="text-xs text-gray-400">IRS Authorized</span>
             <span className="text-xs text-gray-400">Secure</span>
             <span className="text-xs text-gray-400">Confidential</span>
+            <span className="text-xs text-gray-400">|</span>
+            <Link href="/privacy">
+              <a className="text-xs text-gray-400 hover:text-accent transition-colors">Privacy Policy</a>
+            </Link>
           </div>
         </div>
       </div>
