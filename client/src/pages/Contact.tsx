@@ -109,7 +109,7 @@ export default function Contact() {
                      </div>
                      <div>
                        <p className="text-sm font-medium text-muted-foreground">Call Us</p>
-                       <p className="text-lg font-bold text-primary">833-XXX-XXXX</p>
+                       <a href="tel:833-454-4794" className="text-lg font-bold text-primary hover:text-accent transition-colors">833-454-4794</a>
                      </div>
                    </div>
                    
@@ -119,7 +119,7 @@ export default function Contact() {
                      </div>
                      <div>
                        <p className="text-sm font-medium text-muted-foreground">Email Us</p>
-                       <p className="text-lg font-bold text-primary">info@precisemethod.com</p>
+                       <a href="mailto:service@precisemethod.pro" className="text-lg font-bold text-primary hover:text-accent transition-colors">service@precisemethod.pro</a>
                      </div>
                    </div>
 

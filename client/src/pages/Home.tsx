@@ -40,9 +40,11 @@ export default function Home() {
                   Book a Free Consultation
                 </Button>
               </Link>
-              <Button variant="outline" className="h-12 px-8 text-base border-white text-white hover:bg-white hover:text-primary rounded-sm bg-transparent">
-                Call Now: 833-XXX-XXXX
-              </Button>
+              <a href="tel:833-454-4794">
+                <Button variant="outline" className="h-12 px-8 text-base border-white text-white hover:bg-white hover:text-primary rounded-sm bg-transparent">
+                  Call Now: 833-454-4794
+                </Button>
+              </a>
             </div>
           </motion.div>
         </div>

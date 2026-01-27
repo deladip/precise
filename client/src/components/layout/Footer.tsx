@@ -59,11 +59,11 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-accent" />
-                <span className="text-gray-300 text-sm">833-XXX-XXXX</span>
+                <span className="text-gray-300 text-sm">833-454-4794</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-accent" />
-                <span className="text-gray-300 text-sm">info@precisemethod.com</span>
+                <span className="text-gray-300 text-sm">service@precisemethod.pro</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-accent mt-1" />
