@@ -1,38 +1,39 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
+import * as schema from "@shared/schema";
+import type { InsertContactInquiry, ContactInquiry } from "@shared/schema";
 
-// modify the interface with any CRUD methods
-// you might need
+const { Pool } = pg;
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
+
+const pool = new Pool({
+  connectionString,
+});
+
+export const db = drizzle(pool, { schema });
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  insertContactInquiry(inquiry: InsertContactInquiry): Promise<ContactInquiry>;
+  getContactInquiries(): Promise<ContactInquiry[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+class Storage implements IStorage {
+  async insertContactInquiry(inquiry: InsertContactInquiry): Promise<ContactInquiry> {
+    const [result] = await db
+      .insert(schema.contactInquiries)
+      .values(inquiry)
+      .returning();
+    return result;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async getContactInquiries(): Promise<ContactInquiry[]> {
+    return await db.select().from(schema.contactInquiries).orderBy(schema.contactInquiries.createdAt);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new Storage();

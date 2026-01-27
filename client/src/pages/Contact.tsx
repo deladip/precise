@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -18,6 +20,8 @@ const formSchema = z.object({
 
 export default function Contact() {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -28,13 +32,44 @@ export default function Contact() {
     },
   });
 
+  const contactMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to submit inquiry");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Request Sent",
+        description: "We'll be in touch shortly to schedule your consultation.",
+      });
+      form.reset();
+      setIsSubmitting(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send your message. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "Request Sent",
-      description: "We'll be in touch shortly to schedule your consultation.",
-    });
-    form.reset();
+    setIsSubmitting(true);
+    contactMutation.mutate(values);
   }
 
   return (
@@ -175,8 +210,13 @@ export default function Contact() {
                       )}
                     />
 
-                    <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium text-lg">
-                      Send Message
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium text-lg disabled:opacity-50"
+                      data-testid="button-submit-contact"
+                    >
+                      {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
                 </Form>
