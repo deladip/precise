@@ -98,9 +98,11 @@ export default function Contact() {
                    <p className="text-sm text-muted-foreground">Free 15-minute introductory consultation or low-cost strategy call.</p>
                  </div>
                  
-                 <Button className="w-full h-12 text-lg bg-accent hover:bg-accent/90 text-white">
-                   <Calendar className="mr-2 h-5 w-5" /> Schedule Online (Calendly)
-                 </Button>
+                 <a href="https://calendar.app.google/AT2SuG7KDiQeWoCP9" target="_blank" rel="noopener noreferrer">
+                   <Button className="w-full h-12 text-lg bg-accent hover:bg-accent/90 text-white">
+                     <Calendar className="mr-2 h-5 w-5" /> Schedule Online
+                   </Button>
+                 </a>
 
                  <div className="pt-6 border-t border-gray-100 space-y-4">
                    <div className="flex items-center gap-4">
