@@ -88,14 +88,14 @@ export default function Contact() {
                   <iframe 
                     src="https://docs.google.com/forms/d/e/1FAIpQLSdxgZwTGBgcN3j9F6jsbgs165yWFOEbfvXUCFFYIjuyUuixmA/viewform?embedded=true"
                     width="100%"
-                    height="800"
+                    height="1929"
                     frameBorder="0"
                     marginHeight={0}
                     marginWidth={0}
                     className="rounded-md"
                     title="Contact Form"
                   >
-                    Loading...
+                    Loading…
                   </iframe>
                 </div>
               </CardContent>
