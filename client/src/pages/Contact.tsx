@@ -1,8 +1,76 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Phone, Mail, Calendar, Clock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Valid phone number is required"),
+  message: z.string().min(10, "Please provide a brief message about your needs"),
+});
 
 export default function Contact() {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+    },
+  });
+
+  const contactMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to submit inquiry");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Request Sent",
+        description: "We'll be in touch shortly to schedule your consultation.",
+      });
+      form.reset();
+      setIsSubmitting(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send your message. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    contactMutation.mutate(values);
+  }
 
   return (
     <div className="pt-20">
@@ -15,7 +83,6 @@ export default function Contact() {
 
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Info & Booking */}
           <div className="space-y-8">
             <Card className="border-gray-100 shadow-md">
               <CardHeader>
@@ -71,7 +138,6 @@ export default function Contact() {
             </Card>
           </div>
 
-          {/* Contact Form */}
           <div>
             <Card className="border-gray-100 shadow-md h-full">
               <CardHeader>
@@ -84,20 +150,85 @@ export default function Contact() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="w-full">
-                  <iframe 
-                    src="https://docs.google.com/forms/d/e/1FAIpQLSdxgZwTGBgcN3j9F6jsbgs165yWFOEbfvXUCFFYIjuyUuixmA/viewform?embedded=true"
-                    width="100%"
-                    height="1929"
-                    frameBorder="0"
-                    marginHeight={0}
-                    marginWidth={0}
-                    className="rounded-md"
-                    title="Contact Form"
-                  >
-                    Loading…
-                  </iframe>
-                </div>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} className="h-12 bg-gray-50" data-testid="input-name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="john@example.com" {...field} className="h-12 bg-gray-50" data-testid="input-email" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone</FormLabel>
+                            <FormControl>
+                              <Input placeholder="(555) 123-4567" {...field} className="h-12 bg-gray-50" data-testid="input-phone" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>How can we help?</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="I need help with business registration and tax filing..." 
+                              className="min-h-[150px] bg-gray-50 resize-none" 
+                              {...field}
+                              data-testid="input-message"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-medium text-lg disabled:opacity-50"
+                      data-testid="button-submit-contact"
+                    >
+                      {isSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                    
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      By submitting this form, you agree that we may collect and use your information to respond to your inquiry. 
+                      Your data is kept secure and confidential and will not be shared with third parties.
+                    </p>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>
