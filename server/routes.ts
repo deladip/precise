@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { insertContactInquirySchema } from "@shared/schema";
 import { z } from "zod";
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -36,7 +38,33 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/contact/inquiries", async (req, res) => {
+  app.post("/api/admin/login", async (req, res) => {
+    const { password } = req.body;
+    
+    if (password === ADMIN_PASSWORD) {
+      res.json({
+        success: true,
+        message: "Login successful",
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+  });
+
+  app.post("/api/admin/inquiries", async (req, res) => {
+    const { password } = req.body;
+    
+    if (password !== ADMIN_PASSWORD) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
     try {
       const inquiries = await storage.getContactInquiries();
       res.json({
