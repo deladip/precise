@@ -2,13 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Phone, Mail, Calendar, Clock, Paperclip, X } from "lucide-react";
+import { Phone, Mail, Calendar, Clock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -20,8 +21,6 @@ const formSchema = z.object({
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -33,45 +32,14 @@ export default function Contact() {
     },
   });
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Maximum file size is 10MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      setSelectedFile(file);
-    }
-  };
-
-  const removeFile = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append("name", values.name);
-      formData.append("email", values.email);
-      formData.append("phone", values.phone);
-      formData.append("message", values.message);
-      
-      if (selectedFile) {
-        formData.append("attachment", selectedFile);
-      }
-
+  const contactMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
       const response = await fetch("/api/contact", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
       });
 
       if (!response.ok) {
@@ -79,24 +47,29 @@ export default function Contact() {
         throw new Error(error.message || "Failed to submit inquiry");
       }
 
+      return response.json();
+    },
+    onSuccess: () => {
       toast({
         title: "Request Sent",
         description: "We'll be in touch shortly to schedule your consultation.",
       });
       form.reset();
-      setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    } catch (error: any) {
+      setIsSubmitting(false);
+    },
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to send your message. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
-    }
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    contactMutation.mutate(values);
   }
 
   return (
@@ -231,7 +204,7 @@ export default function Contact() {
                           <FormControl>
                             <Textarea 
                               placeholder="I need help with business registration and tax filing..." 
-                              className="min-h-[120px] bg-gray-50 resize-none" 
+                              className="min-h-[150px] bg-gray-50 resize-none" 
                               {...field}
                               data-testid="input-message"
                             />
@@ -240,50 +213,6 @@ export default function Contact() {
                         </FormItem>
                       )}
                     />
-
-                    <div>
-                      <FormLabel>Attach Document (Optional)</FormLabel>
-                      <div className="mt-2">
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          onChange={handleFileSelect}
-                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt"
-                          className="hidden"
-                          data-testid="input-file"
-                        />
-                        {!selectedFile ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full h-12 border-dashed border-2"
-                          >
-                            <Paperclip className="mr-2 h-4 w-4" />
-                            Click to attach a file (PDF, DOC, Image - Max 10MB)
-                          </Button>
-                        ) : (
-                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md border">
-                            <div className="flex items-center gap-2">
-                              <Paperclip className="h-4 w-4 text-accent" />
-                              <span className="text-sm font-medium truncate max-w-[200px]">{selectedFile.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={removeFile}
-                              className="h-8 w-8 p-0"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
 
                     <Button 
                       type="submit" 

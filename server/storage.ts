@@ -1,5 +1,4 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { desc } from "drizzle-orm";
 import pg from "pg";
 import * as schema from "@shared/schema";
 import type { InsertContactInquiry, ContactInquiry } from "@shared/schema";
@@ -33,7 +32,7 @@ class Storage implements IStorage {
   }
 
   async getContactInquiries(): Promise<ContactInquiry[]> {
-    return await db.select().from(schema.contactInquiries).orderBy(desc(schema.contactInquiries.createdAt));
+    return await db.select().from(schema.contactInquiries).orderBy(schema.contactInquiries.createdAt);
   }
 }
 
