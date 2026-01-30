@@ -9,6 +9,8 @@ export const contactInquiries = pgTable("contact_inquiries", {
   email: text("email").notNull(),
   phone: text("phone").notNull(),
   message: text("message").notNull(),
+  attachmentPath: text("attachment_path"),
+  attachmentName: text("attachment_name"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
